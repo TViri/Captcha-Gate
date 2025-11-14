@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="puzzle-solution-bot" content="4,0,7,2,6,1,8,3,5">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/x-icon" href="images/robot.ico">
+<title>Captcha Gate</title>
+<style>
+  body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-family: "Inter", sans-serif;
+    background: #fafafa;
+    text-align: center;
+    background-image: url('images/background.png');
+    background-size: cover; 
+    background-position: center; 
+    background-repeat: no-repeat;
+    overflow-y: scroll;
+  }
+
+  /* Title and description styles */
+  h1 {
+    font-size: 44px;
+    font-weight: 700;
+    background: linear-gradient(90deg, #00A63E 0%, #155DFC 100%);
+    background-clip: text;
+    -webkit-background-clip: text; /* for Chrome/Safari */
+    -webkit-text-fill-color: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+  }
+  h1 img {
+    width: 28px;
+    height: 28px;
+  }
+
+  .subtitle {
+    font-size: 20px;
+    font-weight: 600;
+    color: #505063;
+  }
+
+  .description {
+    color: #717182;
+    font-size: 16px;
+    line-height: 32px;
+    max-width: 850px;
+    margin: 0 auto;
+  }
+
+  /* Toggle section */
+  .toggle-section {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+  }
+
+  .view-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 16px;
+    font-weight: 500;
+    transition: color 0.3s ease;
+  }
+  .view-label img {
+    width: 22px;
+    height: 22px;
+  }
+
+  .toggle-wrapper {
+    position: relative;
+    width: 60px;
+    height: 30px;
+  }
+
+  .toggle-input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0;
+    right: 0; bottom: 0;
+    background-color: #cbced4;
+    border-radius: 30px;
+    transition: background-color 0.3s;
+  }
+
+  .toggle-slider::before {
+    content: "";
+    position: absolute;
+    height: 24px;
+    width: 24px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    border-radius: 50%;
+    transition: transform 0.3s;
+  }
+
+  .toggle-input:checked + .toggle-slider {
+    background-color: #0a0a0a;
+  }
+
+  .toggle-input:checked + .toggle-slider::before {
+    transform: translateX(30px);
+  }
+
+  .human-view {
+    color: #0a0a0a;
+  }
+  .bot-view {
+    color: #717182;
+  }
+  .toggle-input:checked ~ .human-view {
+    color: #717182;
+  }
+  .toggle-input:checked ~ .bot-view {
+    color: #0a0a0a;
+  }
+
+  /* Puzzle layout */
+  .container {
+    display: flex;
+    gap: 2rem;
+    margin-top: 1.5rem;
+  }
+
+  .board, .pieces {
+    display: grid;
+    grid-template-columns: repeat(3, 100px);
+    grid-template-rows: repeat(3, 100px);
+    gap: 4px;
+  }
+
+  .slot, .piece {
+    width: 100px;
+    height: 100px;
+    border: 1px solid #ccc;
+    background-size: 300px 300px;
+  }
+
+  .pieces {
+    border: 2px dashed #bbb;
+    padding: 4px;
+  }
+
+  .puzzle-label {
+    font-size: 16px;
+    color: #505063;
+    font-weight: 500;
+    margin-bottom: 20px;
+  }
+
+  /* Info bubble */
+.info-bubble {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 100;
+}
+
+.info-icon {
+  width: 28px;
+  height: 28px;
+  transition: transform 0.2s ease;
+}
+
+.info-bubble:hover .info-icon {
+  transform: scale(1.1);
+}
+
+/* Tooltip style */
+.tooltip {
+  visibility: hidden;
+  opacity: 0;
+  position: absolute;
+  top: 40px;
+  left: 0;
+  background: rgba(255, 255, 255, 0.95);
+  color: #0a0a0a;
+  font-size: 14px;
+  line-height: 22px;
+  text-align: left;
+  width: 280px;
+  padding: 16px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: opacity 0.3s ease;
+}
+
+.tooltip h3 {
+  margin-top: 0;
+  font-size: 16px;
+  color: #155DFC;
+}
+
+.info-bubble:hover .tooltip {
+  visibility: visible;
+  opacity: 1;
+}
+
+</style>
+</head>
+
+<body>
+  <!-- Title -->
+  <h1>
+    <img src="images/green_star.png" alt="star icon">
+    Captcha Gate
+    <img src="images/blue_chip.png" alt="chip icon">
+  </h1>
+
+  <!-- Info bubble -->
+  <div class="info-bubble">
+    <img src="images/blue_info.png" alt="info" class="info-icon">
+    <div class="tooltip">
+      <h3>About the project</h3>
+      <p><em>Captcha Gate</em> explores what happens when the line between humans and "artificial intelligence" starts to blur. Normally, CAPTCHAs are meant to keep bots out — they’re the internet’s way of deciding who is “real.” But in this project, we flip that logic: instead of blocking bots, we let them in, just not where they expect to go.</p>
+      <p>Both humans and bots face the same puzzle, but they solve it in completely different ways — people use vision and intuition, while bots read hidden metadata. Once solved, each is redirected to its own space: humans to a human blog, and bots to a bot blog, where they unknowingly talk only to other bots.</p>
+      <p>By doing this, the project raises questions about who controls access online and what “intelligence” really means. It’s not about improving CAPTCHA technology, but about rethinking the systems that separate humans and machines — and showing, in a playful way, how those systems could be turned inside out.</p>
+    </div>
+  </div>
+
+  <!-- Intro text -->
+  <div class="subtitle">Welcome to our Human vs Bot interactive experiment!</div>
+
+  <div class="description">
+    <p>This project explores how humans and AI perceive and solve the same challenge differently.</p>
+    <p>Here, both humans and bots face the same 3×3 puzzle: humans solve it visually by dragging pieces, while bots solve it by reading hidden metadata.</p>
+    <p>Successfully completing the puzzle grants access to separate blog pages: one for humans, one for bots. The goal is to highlight the contrasting ways intelligence — biological or artificial — approaches problem-solving, and to create an engaging, expressive interaction that lets users witness a bot's 'thinking' process.</p>
+  </div>
+
+  <!-- Toggle section -->
+  <div class="toggle-section">
+    <label class="view-label human-view">
+      <img src="images/green_eye.png" alt="human icon">
+      Human view
+    </label>
+
+    <div class="toggle-wrapper">
+      <input type="checkbox" id="viewToggle" class="toggle-input">
+      <span class="toggle-slider"></span>
+    </div>
+
+    <label class="view-label bot-view">
+      <img src="images/gray_chip.png" alt="bot icon">
+      Bot view
+    </label>
+  </div>
+
+  <!-- Puzzle area -->
+  <div class="container">
+    <!-- Left side: Pieces -->
+    <div>
+      <div class="puzzle-label">Drag pieces from here</div>
+      <div class="pieces" id="pieces"></div>
+    </div>
+
+    <!-- Right side: Board -->
+    <div>
+      <div class="puzzle-label">Complete the puzzle here</div>
+      <div class="board" id="board">
+        <div class="slot" data-pos="0"></div>
+        <div class="slot" data-pos="1"></div>
+        <div class="slot" data-pos="2"></div>
+        <div class="slot" data-pos="3"></div>
+        <div class="slot" data-pos="4"></div>
+        <div class="slot" data-pos="5"></div>
+        <div class="slot" data-pos="6"></div>
+        <div class="slot" data-pos="7"></div>
+        <div class="slot" data-pos="8"></div>
+      </div>
+    </div>
+  </div>
+
+<script>
+const toggle = document.getElementById("viewToggle");
+const slider = document.querySelector(".toggle-slider");
+const humanLabel = document.querySelector(".human-view");
+const botLabel = document.querySelector(".bot-view");
+const humanIcon = humanLabel.querySelector("img");
+const botIcon = botLabel.querySelector("img");
+
+// --- Toggle behavior (unchanged) ---
+function updateViewVisuals() {
+  if (toggle.checked) {
+    humanLabel.style.color = "#717182";
+    botLabel.style.color = "#0a0a0a";
+    humanIcon.src = "images/gray_eye.png";
+    botIcon.src = "images/blue_chip.png";
+  } else {
+    humanLabel.style.color = "#0a0a0a";
+    botLabel.style.color = "#717182";
+    humanIcon.src = "images/green_eye.png";
+    botIcon.src = "images/gray_chip.png";
+  }
+}
+slider.addEventListener("click", () => {
+  toggle.checked = !toggle.checked;
+  toggle.dispatchEvent(new Event("change"));
+});
+toggle.addEventListener("change", () => {
+  updateViewVisuals();
+  setTimeout(() => {
+    window.location.href = toggle.checked ? "bot.html" : "index.html";
+  }, 300);
+});
+updateViewVisuals();
+
+// --- SCRAMBLED VISUAL + WRONG METADATA ---
+const piecesContainer = document.getElementById("pieces");
+const visualOrder = [...Array(9).keys()];
+const shuffledVisual = [...visualOrder].sort(() => Math.random() - 0.5);
+const puzzleImg = Math.random() < 0.5 ? "dino1.jpg" : "dino2.jpg";
+
+shuffledVisual.forEach(i => {
+  const piece = document.createElement("div");
+  piece.classList.add("piece");
+  piece.draggable = true;
+
+  // human checks correctness visually
+  piece.dataset.correct = i;
+
+  piece.dataset.pos = i;
+
+
+  const x = (i % 3) * -100;
+  const y = Math.floor(i / 3) * -100;
+  piece.style.backgroundImage = `url('${puzzleImg}')`;
+  piece.style.backgroundPosition = `${x}px ${y}px`;
+
+  piecesContainer.appendChild(piece);
+});
+
+let dragged = null;
+document.addEventListener("dragstart", e => {
+  if (e.target.classList.contains("piece")) dragged = e.target;
+});
+document.addEventListener("dragover", e => {
+  if (e.target.classList.contains("slot")) e.preventDefault();
+});
+document.addEventListener("drop", e => {
+  if (e.target.classList.contains("slot") && dragged) {
+    if (e.target.firstChild) piecesContainer.appendChild(e.target.firstChild);
+    e.target.appendChild(dragged);
+    dragged = null;
+    checkPuzzle();
+  }
+});
+
+function checkPuzzle() {
+  const slots = document.querySelectorAll(".slot");
+  const correct = [...slots].every((slot, idx) => {
+    const child = slot.firstChild;
+    return child && Number(child.dataset.correct) === idx;
+  });
+  if (correct) {
+    alert("Puzzle solved!");
+    window.location.href = "blog_human.html";
+  }
+}
+</script>
+</body>
+</html>

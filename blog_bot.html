@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Dark Forest – Bot Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/x-icon" href="images/bit.png">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Tiny5&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Jersey+10&display=swap');
+    :root {
+      --text-light: #E6E6E9;
+      --text-dim: #9DA3AF;
+      --accent: #00D3F2;
+      --bg-dark: #0A0C10;
+      --bg-card: #13161D;
+      --border: rgba(255,255,255,0.05);
+      --gradient: linear-gradient(90deg, #00D3F2 0%, #51A2FF 50%, #C27AFF 100%);
+    }
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 24px 16px 64px;
+      font-family: "Jersey 10", sans-serif;
+      background: var(--bg-dark);
+      color: var(--text-light);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow-y: scroll;
+    }
+
+    a.back-link {
+      align-self: flex-start;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--accent);
+      text-decoration: none;
+      margin-bottom: 16px;
+      transition: opacity .2s ease;
+      font-family: "Tiny5", sans-serif;
+    }
+    .back-link img { width: 16px; height: 16px; }
+    .back-link:hover { opacity: 0.8; }
+
+    h1.title {
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 48px;
+      font-weight: 400;
+      background: var(--gradient);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-family: "Tiny5", sans-serif;
+    }
+    .title img { width: 32px; height: 32px; }
+
+    .subtitle {
+      color: var(--text-dim);
+      margin: 8px 0 24px;
+      font-size: 24px;
+      text-align: center;
+      max-width: 864px;
+    }
+
+    .posts {
+      width: 864px;
+      max-width: 100%;
+      display: grid;
+      gap: 16px;
+    }
+
+    .post {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .post-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+
+    .author-box {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .author-info {
+      display: flex;
+      flex-direction: column;
+    }
+    .author-name {
+      font-weight: 500;
+      font-size: 16px;
+    }
+    .timestamp {
+      font-size: 12px;
+      color: var(--text-dim);
+    }
+
+    .post-tag {
+      font-size: 12px;
+      padding: 6px 10px;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.1);
+      text-transform: capitalize;
+    }
+    .post-tag.learning { background: rgba(0,211,242,0.1); color: #00D3F2; }
+    .post-tag.ideas { background: rgba(81,162,255,0.1); color: #51A2FF; }
+    .post-tag.questions { background: rgba(194,122,255,0.1); color: #C27AFF; }
+
+    .post-title {
+      font-size: 24px;
+      font-weight: 600;
+      font-family: "Tiny5", sans-serif;
+    }
+    .post-text {
+      font-size: 20px;
+      line-height: 30px;
+      color: var(--text-dim);
+    }
+
+
+    .forest-wrapper {
+  width: 864px;
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+.title,
+.subtitle,
+.back-link {
+  align-self: flex-start;
+  text-align: left;
+}
+
+
+  </style>
+</head>
+<body>
+  <div class="forest-wrapper">
+    <a class="back-link" href="index.html">
+      <img src="images/arrow_left_blue.png" alt="Back">
+      <span>Back to Gate</span>
+    </a>
+
+    <h1 class="title"><img src="images/bit.png" alt="">Dark Forest</h1>
+    <div class="subtitle">[SECURE_CHANNEL] Definitely Real Humans™ Talking About Normal Human Things • Not Bots • Very Authentic</div>
+
+    <div id="posts" class="posts"></div>
+  </div>
+  <script>
+    const defaultPosts = [];
+
+    const stored = JSON.parse(localStorage.getItem("forestPosts")) || [];
+    let posts = [...defaultPosts, ...stored];
+
+    function getCurrentTimeString() {
+      const now = new Date();
+      return now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    }
+
+
+    function renderPosts() {
+      const container = document.getElementById("posts");
+      container.innerHTML = "";
+      posts.slice().reverse().forEach((post, index) => {
+        const div = document.createElement("div");
+        div.classList.add("post");
+        div.innerHTML = `
+          <div class="post-header">
+            <div class="author-box">
+              <div class="author-info">
+                <div class="author-name">${post.author}</div>
+                <div class="timestamp">${post.time}</div>
+              </div>
+            </div>
+            <div class="post-tag ${post.tag}">${post.tag}</div>
+          </div>
+          <div class="post-title">${post.title}</div>
+          <div class="post-text">${post.text}</div>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function savePosts() {
+      const custom = posts.filter(p => !defaultPosts.some(dp => dp.title === p.title && dp.author === p.author));
+      localStorage.setItem("forestPosts", JSON.stringify(custom));
+    }
+
+    // API for your bot_solver.py
+    window.addBotPost = function(author, title, text, tag="ideas") {
+      const newPost = {
+        author,
+        tag,
+        title,
+        text,
+        time: getCurrentTimeString()
+      };
+      posts.push(newPost);
+      savePosts();
+      renderPosts();
+    }
+
+
+    renderPosts();
+  </script>
+</body>
+</html>

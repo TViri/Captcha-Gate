@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Digital Garden – Human Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" type="image/x-icon" href="images/garden.ico">
+  <style>
+    :root{
+      --text-dark:#0A0A0A;
+      --gray:#717182;
+      --green:#00A63E;
+      --green-2:#009966;
+      --chip: linear-gradient(90deg, #00A63E 0%, #096 50%, #009689 100%);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      padding:24px 16px 64px;
+      font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      color:var(--text-dark);
+      background:#fafafa;
+      overflow-y: scroll;
+    }
+
+    /* Back link */
+    .back-link{
+      align-self:flex-start;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 10px;
+      border-radius:8px;
+      text-decoration:none;
+      color:var(--text-dark);
+      transition:background-color .2s ease;
+    }
+    .back-link img {
+      width: 16px;
+    }
+
+    .back-link:hover{ background:#eee; }
+
+    /* Title */
+    .title{
+      margin: 0;
+      padding: 8px 0;
+      display:flex;
+      align-items:center;
+      gap:12px;
+      font-size:48px;
+      font-weight: 400;
+      line-height: 48px;
+      background: var(--chip);
+      -webkit-background-clip:text;
+      background-clip:text;
+      -webkit-text-fill-color:transparent;
+    }
+    .title img{ width:32px; height:32px; }
+
+    .subtitle{
+      margin:6px 0 18px;
+      font-size:16px;
+      color:var(--gray);
+      text-align:center;
+      max-width:864px;
+    }
+
+    /* Tags filter */
+    .tags{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin:10px 0 22px;
+    }
+    .tag{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 14px;
+      border-radius:8px;
+      border:1px solid rgba(0,0,0,0.1);
+      background:#fff;
+      color:var(--text-dark);
+      font-size:14px;
+      font-weight:500;
+      cursor:pointer;
+      user-select:none;
+      transition:background .2s ease, color .2s ease, border-color .2s ease, transform .02s ease-in;
+    }
+    .tag:active{ transform:scale(0.99); }
+    .tag img{ width:18px; height:18px; }
+    .tag.active{
+      background:var(--green);
+      color:#fff;
+      border-color:transparent;
+    }
+
+    /* New seed button */
+    .new-seed-btn{
+      width:864px;
+      max-width:100%;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      padding:12px 16px;
+      border-radius:8px;
+      background:#009966;
+      color:#fff;
+      font-size:16px;
+      font-weight:550;
+      border:none;
+      cursor:pointer;
+      transition:filter .2s ease, transform .02s ease-in;
+    }
+    .new-seed-btn:active{ transform:translateY(1px); }
+    .new-seed-btn img{ width:18px; height:18px; filter:brightness(0) invert(1); }
+
+    /* Seed form (hidden by default) */
+    .seed-form{
+      width:864px;
+      max-width:100%;
+      margin-top:14px;
+      background:rgba(255,255,255,0.8);
+      border:1px solid #B9F8CF;
+      border-radius:14px;
+      padding:16px;
+      display:none;
+    }
+    .seed-form-header{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      font-size:16px;
+      color:var(--text-dark);
+      font-weight:600;
+      margin-bottom:30px;
+    }
+    .seed-form-header img{ width:18px; height:18px; }
+
+    .input{
+      width:814px;
+      max-width:100%;
+      height:36px;
+      background:#F3F3F5;
+      border:1px solid rgba(0,0,0,0.06);
+      border-radius:8px;
+      padding:8px 12px;
+      font-size:14px;
+      outline:none;
+    }
+    .input::placeholder{ color:var(--gray); }
+
+    .textarea{
+      width:814px;
+      max-width:100%;
+      height:64px;
+      background:#F3F3F5;
+      border:1px solid rgba(0,0,0,0.06);
+      border-radius:8px;
+      padding:10px 12px;
+      font-size:14px;
+      outline:none;
+      resize:vertical;
+      min-height:64px;
+    }
+    .textarea::placeholder{ color:var(--gray); }
+
+    .mini-tags{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      margin-top:16px;
+    }
+    .mini-tag{
+      font-size:12px;
+      padding:6px 10px;
+      border-radius:8px;
+      border:1px solid rgba(0,0,0,0.1);
+      cursor:pointer;
+      user-select:none;
+      transition:transform .02s ease-in;
+    }
+    .mini-tag:active{ transform:scale(0.99); }
+    .mini-tag.learning{ background:#D0FAE5; color:#007A55; }
+    .mini-tag.ideas{ background:#FEF9C2; color:#A65F00; }
+    .mini-tag.questions{ background:#DBEAFE; color:#1447E6; }
+
+    .form-actions{
+      display:flex;
+      gap:10px;
+      margin-top:36px;
+    }
+    .btn{
+      height:36px;
+      padding:0 14px;
+      border-radius:8px;
+      font-size:14px;
+      font-weight:600;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      cursor:pointer;
+      border:1px solid transparent;
+      background:#fff;
+      color:var(--text-dark);
+    }
+    .btn-cancel{
+      border:1px solid rgba(0,0,0,0.1);
+      background:#fff;
+      color:var(--text-dark);
+    }
+    .btn-plant{
+      background:#00A63E;
+      color:#fff;
+      border:none;
+    }
+    .btn-plant img{
+      width:16px; height:16px;
+      filter:brightness(0) invert(1);
+    }
+
+    /* Placeholder posts container (optional; initially empty) */
+    .posts{
+      width:864px;
+      max-width:100%;
+      margin-top:20px;
+      display:grid;
+      gap:12px;
+    }
+    .hidden{ display:none !important; }
+
+.blog-wrapper {
+  width: 864px;
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start; /* align text and elements left */
+}
+
+.back-link {
+  align-self: flex-start; /* stays at the top left */
+  margin-bottom: 16px;
+}
+
+.title,
+.subtitle,
+.tags {
+  text-align: left; /* left-align text */
+  align-self: flex-start; /* keep aligned inside wrapper */
+}
+
+.subtitle {
+  max-width: 864px;
+}
+
+/* --- BLOG POSTS --- */
+.post {
+  width: 864px;
+  max-width: 100%;
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(185, 248, 207, 0.5);
+  border-radius: 14px;
+  padding: 24px;
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.post-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.author-box {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.initials {
+  background: #DCFCE7;
+  color: #008236;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 16px;
+  line-height: 24px;
+}
+
+.author-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.author-name {
+  font-size: 16px;
+  font-weight: 500;
+  color: #0A0A0A;
+}
+
+.timestamp {
+  font-size: 12px;
+  line-height: 16px;
+  color: #717182;
+}
+
+.post-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.post-tag-wrapper {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px; /* small space between tag bubble and emoji */
+}
+
+.post-emoji {
+  font-size: 14px;
+  line-height: 1;
+}
+
+.post-tag.learning { background:#D0FAE5; color:#007A55; }
+.post-tag.ideas { background:#FEF9C2; color:#A65F00; }
+.post-tag.questions { background:#DBEAFE; color:#1447E6; }
+
+.post-title {
+  font-size: 16px;
+  line-height: 20px;
+  color: #0A0A0A;
+  font-weight: 600;
+}
+
+.post-text {
+  font-size: 16px;
+  line-height: 24px;
+  color: #717182;
+}
+
+.post-footer {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.action {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+.action:hover { background: #F3F3F5; }
+.action img { width: 16px; height: 16px; }
+
+.action span {
+  font-size: 14px;
+  line-height: 20px;
+  color: #0A0A0A;
+}
+
+/* Replies */
+.replies-section {
+  margin-top: 16px;
+  border-top: 1px solid rgba(0,0,0,0.1);
+  padding-top: 16px;
+}
+
+.reply {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding-left: 18px;
+  border-left: 2px solid #B9F8CF;
+  margin-bottom: 16px;
+}
+
+.reply-initials {
+  background: #DCFCE7;
+  color: #008236;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.reply-content {
+  flex: 1;
+}
+
+.reply-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.reply-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: #0A0A0A;
+}
+
+.reply-time {
+  font-size: 12px;
+  color: #717182;
+}
+
+.reply-text {
+  font-size: 14px;
+  line-height: 20px;
+  color: #717182;
+  margin-top: 4px;
+}
+
+.reply-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.reply-actions .action span { font-size: 12px; }
+
+/* Add reply box */
+.add-reply {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.add-reply textarea {
+  flex: 1;
+  height: 64px;
+  background: #fff;
+  border: 1px solid rgba(0,0,0,0.1);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 14px;
+  line-height: 20px;
+  color: #0A0A0A;
+  resize: none;
+}
+
+.add-reply textarea::placeholder { color: #717182; }
+
+.reply-btn {
+  background: rgba(0, 166, 62, 0.5); /* 50% opacity */
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  height: 36px; /* smaller */
+  padding: 0 20px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+}
+.reply-btn:hover {
+  background: rgba(0, 166, 62, 0.7);
+}
+
+.user-name-control {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  width: 864px;
+  max-width: 100%;
+  margin-top: -8px;
+  margin-bottom: 16px;
+  font-size: 14px;
+  color: #717182;
+  gap: 8px;
+}
+
+.set-name-btn {
+  background: none;
+  border: none;
+  color: #00A63E;
+  cursor: pointer;
+  font-size: 14px;
+  text-decoration: underline;
+  transition: color 0.2s ease;
+}
+.set-name-btn:hover {
+  color: #008236;
+}
+
+
+
+  </style>
+</head>
+<body>
+  <div class="blog-wrapper">
+      <!-- Back to gate -->
+  <a class="back-link" href="index.html" title="Back to Gate">
+    <img src="images/arrow_left_black.png" alt="Left arrow">
+    <span>Back to Gate</span>
+  </a>
+
+  <!-- Title -->
+  <h1 class="title">
+    <img src="images/plant_green.png" alt="Plant icon">
+    Digital Garden
+  </h1>
+
+  <div class="user-name-control">
+    <span id="currentUserName">Posting as <strong>You</strong></span>
+    <button id="setUserNameBtn" class="set-name-btn">Set your name</button>
+  </div>
+
+
+  <!-- Subtitle -->
+  <div class="subtitle">
+    A space for growing ideas, learning in public, and cultivating knowledge together
+  </div>
+
+  <!-- Filter tags -->
+  <div class="tags" id="tags">
+    <button class="tag active" data-filter="all">
+      <img src="images/leaf_white.png" data-black="images/leaf_black.png" data-white="images/leaf_white.png" alt="">
+      All
+    </button>
+    <button class="tag" data-filter="learning">
+      <img src="images/plant_black.png" data-black="images/plant_black.png" data-white="images/plant_white.png" alt="">
+      Learning
+    </button>
+    <button class="tag" data-filter="ideas">
+      <img src="images/star_black.png" data-black="images/star_black.png" data-white="images/star_white.png" alt="">
+      Ideas
+    </button>
+    <button class="tag" data-filter="questions">
+      <img src="images/question_black.png" data-black="images/question_black.png" data-white="images/question_white.png" alt="">
+      Questions
+    </button>
+  </div>
+
+  <!-- New seed button -->
+  <button class="new-seed-btn" id="newSeedBtn">
+    <img src="images/plus_white.png" alt="">
+    Plant a new seed
+  </button>
+
+  <!-- Seed form (hidden by default) -->
+  <div class="seed-form" id="seedForm">
+    <div class="seed-form-header">
+      <img src="images/plant_green.png" alt="">
+      <span>Plant a new idea</span>
+    </div>
+
+    <input class="input" type="text" placeholder="Give your idea a title..." id="seedTitle" />
+
+    <div style="height:16px"></div>
+
+    <textarea class="textarea" placeholder="Describe your thought, question, or learning..." id="seedBody"></textarea>
+
+    <div class="mini-tags" id="miniTags">
+      <div class="mini-tag learning" data-mini="learning">Learning</div>
+      <div class="mini-tag ideas" data-mini="ideas">Ideas</div>
+      <div class="mini-tag questions" data-mini="questions">Questions</div>
+    </div>
+
+    <div class="form-actions">
+      <button class="btn btn-cancel" id="cancelSeed">Cancel</button>
+      <button class="btn btn-plant" id="plantSeed">
+        <img src="images/plant_white.png" alt="">
+        Plant Seed
+      </button>
+    </div>
+  </div>
+
+  <!-- Placeholder for posts (optional; empty for now) -->
+  <div class="posts" id="posts"></div>
+
+  </div>
+
+  
+  <script>
+    // --- Tag filter logic (one active at a time, icon color swap) ---
+    
+    localStorage.removeItem("dgUserName");
+    localStorage.removeItem("dgUserInitials");
+
+    // --- User name handling ---
+const setUserNameBtn = document.getElementById("setUserNameBtn");
+const currentUserName = document.getElementById("currentUserName");
+
+// Load saved user data
+let userName = localStorage.getItem("dgUserName") || "You";
+let userInitials = localStorage.getItem("dgUserInitials") || "YO";
+
+currentUserName.innerHTML = `Posting as <strong>${userName}</strong>`;
+
+// Helper: get initials
+function getInitials(name) {
+  return name
+    .split(" ")
+    .map(w => w.charAt(0))
+    .join("")
+    .substring(0, 2)
+    .toUpperCase();
+}
+
+// Set name button
+setUserNameBtn.addEventListener("click", () => {
+  const newName = prompt("Enter your name:");
+  if (newName && newName.trim() !== "") {
+    userName = newName.trim();
+    userInitials = getInitials(userName);
+    localStorage.setItem("dgUserName", userName);
+    localStorage.setItem("dgUserInitials", userInitials);
+    currentUserName.innerHTML = `Posting as <strong>${userName}</strong>`;
+  }
+});
+
+    const tagBar = document.getElementById('tags');
+    const tagButtons = Array.from(tagBar.querySelectorAll('.tag'));
+
+    function setActiveTag(btn){
+      tagButtons.forEach(b=>{
+        b.classList.remove('active');
+        const img = b.querySelector('img');
+        if(img) img.src = img.dataset.black;
+      });
+      btn.classList.add('active');
+      const img = btn.querySelector('img');
+      if(img) img.src = img.dataset.white;
+
+      const filter = btn.dataset.filter;
+      const posts = document.querySelectorAll('.post');
+      posts.forEach(p=>{
+        const tag = p.dataset.tag;
+        p.classList.toggle('hidden', !(filter === 'all' || tag === filter));
+      });
+    }
+
+
+    tagButtons.forEach(btn=>{
+      btn.addEventListener('click', ()=> setActiveTag(btn));
+    });
+
+    // --- Seed form toggle ---
+    const newSeedBtn = document.getElementById('newSeedBtn');
+    const seedForm = document.getElementById('seedForm');
+    const cancelSeed = document.getElementById('cancelSeed');
+    const plantSeed = document.getElementById('plantSeed');
+
+    newSeedBtn.addEventListener('click', ()=>{
+      seedForm.style.display = seedForm.style.display === 'block' ? 'none' : 'block';
+    });
+    cancelSeed.addEventListener('click', ()=>{
+      seedForm.style.display = 'none';
+    });
+
+    // (Optional) choose one mini-tag (you can allow multi-select if you want)
+    const miniTags = document.querySelectorAll('.mini-tag');
+    miniTags.forEach(t=>{
+      t.addEventListener('click', ()=>{
+        miniTags.forEach(m=> m.classList.remove('selected'));
+        t.classList.add('selected');
+      });
+    });
+
+    // (Optional) on Plant Seed, you could append a post card to #posts.
+    plantSeed.addEventListener('click', (e)=>{
+      e.preventDefault();
+      // Hook up later if you want to actually add posts.
+      // For now we just close the form.
+      seedForm.style.display = 'none';
+    });
+
+// === BLOG POST DATA ===
+const postsData = [
+  {
+    author: "Chris Morrison",
+    initials: "CM",
+    tag: "questions",
+    emoji: "🌱",
+    title: "What tools are you using for your digital garden?",
+    text: "I'm curious about the tech stack everyone is using. I'm currently experimenting with Obsidian but interested in other approaches.",
+    likes: 18,
+    time: "3 days ago",
+    replies: [
+      {
+        author: "Taylor Green",
+        initials: "TG",
+        time: "2 days ago",
+        text: "I use a combination of Notion and a custom Next.js site. The key is finding what works for your thinking style!",
+        likes: 6
+      }
+    ]
+  },
+  {
+    author: "Maya Patel",
+    initials: "MP",
+    tag: "ideas",
+    emoji: "🌿",
+    title: "The garden as a second brain",
+    text: "I've been using my digital garden as an extension of my thinking. The act of linking notes together has helped me discover patterns I never would have noticed otherwise.",
+    likes: 31,
+    time: "1 day ago",
+    replies: []
+  },
+  {
+    author: "Jordan Park",
+    initials: "JP",
+    tag: "learning",
+    emoji: "🍃",
+    title: "Learning in public: My experience with building a knowledge base",
+    text: "I started documenting my learning journey publicly 6 months ago. The accountability and connections I've made have been incredible. Anyone else practicing learning in public?",
+    likes: 45,
+    time: "5 hours ago",
+    replies: [
+      {
+        author: "Alex Kim",
+        initials: "AK",
+        time: "3 hours ago",
+        text: "This is inspiring! I've been hesitant to share my 'messy' notes. How did you overcome the fear of showing incomplete work?",
+        likes: 5
+      }
+    ]
+  },
+  {
+    author: "Sarah Chen",
+    initials: "SC",
+    tag: "questions",
+    emoji: "🌸",
+    title: "How do digital gardens differ from traditional blogs?",
+    text: "I've been exploring the concept of digital gardens and I'm curious about the fundamental differences. It seems like it's more about continuous growth and interconnection rather than chronological posting. What are your thoughts?",
+    likes: 25,
+    time: "2 hours ago",
+    replies: [
+      {
+        author: "Marcus Webb",
+        initials: "MW",
+        time: "1 hour ago",
+        text: "Great question! I think the key difference is that gardens are meant to be tended over time. A blog post is published and mostly static, but a garden note evolves, branches, and connects to other ideas.",
+        likes: 12
+      },
+      {
+        author: "Elena Rodriguez",
+        initials: "ER",
+        time: "45 minutes ago",
+        text: "I'd add that gardens embrace imperfection. You can plant a seed of an idea even when it's not fully formed. It's liberating!",
+        likes: 8
+      }
+    ]
+  }
+];
+
+// --- Merge saved local posts with defaults ---
+const savedPosts = JSON.parse(localStorage.getItem("dgPosts")) || [];
+const combinedPosts = [...savedPosts, ...postsData];
+
+
+const postsContainer = document.getElementById("posts");
+
+function saveLocalPosts(updatedLocalPosts) {
+  localStorage.setItem("dgPosts", JSON.stringify(updatedLocalPosts));
+}
+
+
+// Function to create a post
+function renderPost(post) {
+  const div = document.createElement("div");
+  div.classList.add("post");
+  div.dataset.tag = post.tag;
+
+  div.innerHTML = `
+    <div class="post-header">
+      <div class="author-box">
+        <div class="initials">${post.initials}</div>
+        <div class="author-info">
+          <div class="author-name">${post.author}</div>
+          <div class="timestamp">${post.time}</div>
+        </div>
+      </div>
+    
+      <div class="post-tag-wrapper">
+  <div class="post-tag ${post.tag}">
+      ${post.tag.charAt(0).toUpperCase() + post.tag.slice(1)}
+    </div>
+    <span class="post-emoji">${
+      post.tag === "learning" ? "🍃" : post.tag === "ideas" ? "🌿" : "🌸"
+    }</span>
+  </div>
+
+  
+    </div>
+
+    <div class="post-title">${post.title}</div>
+    <div class="post-text">${post.text}</div>
+
+    <div class="post-footer">
+      <div class="action like"><img src="images/like_black.png" alt=""> <span>${post.likes}</span></div>
+      <div class="action reply-toggle"><img src="images/question_black.png" alt=""> <span>${post.replies.length}</span></div>
+    </div>
+
+    <div class="replies-section" style="display:none">
+      ${post.replies.map(r => `
+        <div class="reply">
+          <div class="reply-initials">${r.initials}</div>
+          <div class="reply-content">
+            <div class="reply-header">
+              <span class="reply-name">${r.author}</span>
+              <span class="reply-time">${r.time}</span>
+            </div>
+            <div class="reply-text">${r.text}</div>
+            <div class="reply-actions">
+              <div class="action reply-like"><img src="images/like_black.png" alt=""> <span>${r.likes}</span></div>
+            </div>
+          </div>
+        </div>
+      `).join("")}
+      <div class="add-reply">
+        <textarea placeholder="Add to the conversation..."></textarea>
+        <button class="reply-btn">Reply</button>
+      </div>
+    </div>
+  `;
+
+  // --- Like button
+  div.querySelector(".like").addEventListener("click", e => {
+    const span = e.currentTarget.querySelector("span");
+    span.textContent = Number(span.textContent) + 1;
+  });
+
+  // --- Toggle replies
+  div.querySelector(".reply-toggle").addEventListener("click", e => {
+    const section = div.querySelector(".replies-section");
+    section.style.display = section.style.display === "none" ? "block" : "none";
+  });
+
+  // --- Reply like buttons
+  div.querySelectorAll(".reply-like").forEach(likeBtn => {
+    likeBtn.addEventListener("click", e => {
+      const span = e.currentTarget.querySelector("span");
+      span.textContent = Number(span.textContent) + 1;
+    });
+  });
+
+  // --- Add new reply
+  div.querySelector(".reply-btn").addEventListener("click", e => {
+    const textarea = div.querySelector("textarea");
+    const text = textarea.value.trim();
+    if (!text) return;
+    const replyDiv = document.createElement("div");
+    replyDiv.classList.add("reply");
+    replyDiv.innerHTML = `
+  <div class="reply-initials">${userInitials}</div>
+  <div class="reply-content">
+    <div class="reply-header">
+      <span class="reply-name">${userName}</span>
+      <span class="reply-time">just now</span>
+    </div>
+    <div class="reply-text">${text}</div>
+    <div class="reply-actions">
+      <div class="action reply-like"><img src="images/like_black.png" alt=""> <span>0</span></div>
+    </div>
+  </div>
+`;
+
+// --- Save reply to localStorage if this is a user-created post ---
+const localPosts = JSON.parse(localStorage.getItem("dgPosts")) || [];
+const postIndex = localPosts.findIndex(p => p.title === post.title && p.text === post.text);
+
+if (postIndex !== -1) {
+  localPosts[postIndex].replies.push({
+    author: userName,
+    initials: userInitials,
+    time: "just now",
+    text,
+    likes: 0
+  });
+  saveLocalPosts(localPosts);
+}
+
+
+
+    div.querySelector(".add-reply").insertAdjacentElement("beforebegin", replyDiv);
+    textarea.value = "";
+    div.querySelector(".reply-toggle span").textContent =
+      Number(div.querySelector(".reply-toggle span").textContent) + 1;
+  });
+
+  postsContainer.appendChild(div);
+}
+
+// Render all initial posts (newest first)
+combinedPosts.slice().reverse().forEach(renderPost);
+
+
+
+// === Handle "Plant Seed" form ===
+plantSeed.addEventListener("click", e => {
+  e.preventDefault();
+  const title = document.getElementById("seedTitle").value.trim();
+  const text = document.getElementById("seedBody").value.trim();
+  const selectedTag = document.querySelector(".mini-tag.selected");
+  if (!title || !text || !selectedTag) return alert("Please fill title, text and select a tag.");
+
+  const tagType = selectedTag.dataset.mini;
+  const emoji = tagType === "ideas" ? "🌿" : tagType === "learning" ? "🍃" : "🌸";
+
+  const newPost = {
+    author: userName,
+    initials: userInitials,
+    tag: tagType,
+    emoji,
+    title,
+    text,
+    likes: 0,
+    time: "just now",
+    replies: []
+  };
+
+  // Load existing local posts (if any)
+  const localPosts = JSON.parse(localStorage.getItem("dgPosts")) || [];
+  localPosts.unshift(newPost);
+  localStorage.setItem("dgPosts", JSON.stringify(localPosts));
+
+  // Also update live view
+  postsContainer.innerHTML = "";
+  [...localPosts, ...postsData].reverse().forEach(renderPost);
+
+  document.getElementById("seedForm").style.display = "none";
+  document.getElementById("seedTitle").value = "";
+  document.getElementById("seedBody").value = "";
+  document.querySelectorAll(".mini-tag").forEach(t => t.classList.remove("selected"));
+});
+
+
+
+
+  </script>
+</body>
+</html>

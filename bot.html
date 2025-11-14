@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="puzzle-solution-bot" content="4,0,7,2,6,1,8,3,5">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/x-icon" href="images/robot.ico">
+<title>Captcha Gate – Bot View</title>
+<style>
+  /* --- COPY of index.html styles so the header/toggle look identical --- */
+  body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-family: "Inter", sans-serif;
+    background: #fafafa;
+    text-align: center;
+    background-image: url('images/background.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
+
+  /* Title and description styles */
+  h1 {
+    font-size: 44px;
+    font-weight: 700;
+    background: linear-gradient(90deg, #00A63E 0%, #155DFC 100%);
+    background-clip: text;
+    -webkit-background-clip: text; /* for Chrome/Safari */
+    -webkit-text-fill-color: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+  }
+  h1 img {
+    width: 28px;
+    height: 28px;
+  }
+
+  .subtitle {
+    font-size: 20px;
+    font-weight: 600;
+    color: #505063;
+  }
+
+  .description {
+    color: #717182;
+    font-size: 16px;
+    line-height: 32px;
+    max-width: 850px;
+    margin: 0 auto;
+  }
+
+  /* Toggle section */
+  .toggle-section {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+  }
+
+  .view-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 16px;
+    font-weight: 500;
+    transition: color 0.3s ease;
+  }
+  .view-label img {
+    width: 22px;
+    height: 22px;
+  }
+
+  .toggle-wrapper {
+    position: relative;
+    width: 60px;
+    height: 30px;
+  }
+
+  .toggle-input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0;
+    right: 0; bottom: 0;
+    background-color: #cbced4;
+    border-radius: 30px;
+    transition: background-color 0.3s;
+  }
+
+  .toggle-slider::before {
+    content: "";
+    position: absolute;
+    height: 24px;
+    width: 24px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    border-radius: 50%;
+    transition: transform 0.3s;
+  }
+
+  .toggle-input:checked + .toggle-slider {
+    background-color: #0a0a0a;
+  }
+
+  .toggle-input:checked + .toggle-slider::before {
+    transform: translateX(30px);
+  }
+
+  .human-view { color: #0a0a0a; }
+  .bot-view   { color: #717182; }
+  .toggle-input:checked ~ .human-view { color: #717182; }
+  .toggle-input:checked ~ .bot-view   { color: #0a0a0a; }
+
+  /* --- AFTER TOGGLE: BOT-SPECIFIC CONTENT ONLY --- */
+
+  #container {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-top: 1.25rem;
+    width: 90%;
+    max-width: 800px;
+    overflow-x: auto;
+    text-align: left;
+    color: #c9d1d9;
+  }
+
+  .meta { color: #58a6ff; }
+  pre { white-space: pre-wrap; }
+
+  .piece {
+    border: 1px solid #30363d;
+    background: #1e232a;
+    padding: 0.5rem;
+    margin: 0.25rem 0;
+    border-radius: 4px;
+  }
+  .key   { color: #ffa657; }
+  .value { color: #a5d6ff; }
+
+  #runBot {
+    background: #21262d;
+    color: #9cdcfe;
+    border: 1px solid #30363d;
+    padding: 0.6rem 1.2rem;
+    border-radius: 6px;
+    cursor: pointer;
+    margin: 1rem 0 0.25rem 0;
+    font-size: 1rem;
+  }
+  #runBot:hover { background: #30363d; }
+
+  #log {
+    background: #0d1117;
+    border: 1px solid #30363d;
+    border-radius: 6px;
+    width: 90%;
+    max-width: 800px;
+    padding: 1rem;
+    margin-top: 0.75rem;
+    font-size: 0.9rem;
+    color: #8b949e;
+    white-space: pre-line;
+    text-align: left;
+  }
+
+  /* Info bubble */
+.info-bubble {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 100;
+}
+
+.info-icon {
+  width: 28px;
+  height: 28px;
+  transition: transform 0.2s ease;
+}
+
+.info-bubble:hover .info-icon {
+  transform: scale(1.1);
+}
+
+/* Tooltip style */
+.tooltip {
+  visibility: hidden;
+  opacity: 0;
+  position: absolute;
+  top: 40px;
+  left: 0;
+  background: rgba(255, 255, 255, 0.95);
+  color: #0a0a0a;
+  font-size: 14px;
+  line-height: 22px;
+  text-align: left;
+  width: 280px;
+  padding: 16px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: opacity 0.3s ease;
+}
+
+.tooltip h3 {
+  margin-top: 0;
+  font-size: 16px;
+  color: #155DFC;
+}
+
+.info-bubble:hover .tooltip {
+  visibility: visible;
+  opacity: 1;
+}
+
+.bot-perspective {
+  color: #155DFC;
+  font-size: 15px;
+  line-height: 26px;
+  max-width: 800px;
+  margin: 1rem auto 0 auto;
+  text-align: left;
+  padding-left: 0.5rem;
+}
+.bot-perspective code {
+  color: #155DFC;
+  font-weight: 600;
+  background: rgba(21, 93, 252, 0.08);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: "Courier New", monospace;
+}
+
+#bot-vision {
+  margin-top: 2rem;
+  width: 90%;
+  max-width: 800px;
+  text-align: left;
+  color: #c9d1d9;
+  width: max-content;
+  margin: 0 auto;
+}
+
+#bot-vision h3 {
+  color: #155DFC;
+  font-size: 18px;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.bot-board {
+  display: grid;
+  grid-template-columns: repeat(3, 100px);
+  grid-template-rows: repeat(3, 100px);
+  gap: 4px;
+  background: #161b22;
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid #30363d;
+  width: max-content;
+}
+
+.bot-piece {
+  width: 100px;
+  height: 100px;
+  position: relative;
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  background-image: url('dino1.jpg');
+  background-size: 300px 300px;
+  filter: grayscale(100%) opacity(0.85);
+}
+
+.bot-meta {
+  position: absolute;
+  bottom: 6px;
+  left: 6px;
+  font-size: 11px;
+  color: #a5d6ff;
+  background: rgba(0, 0, 0, 0.55);
+  padding: 2px 4px;
+  border-radius: 4px;
+  font-family: "Courier New", monospace;
+}
+
+
+</style>
+</head>
+<body>
+  <!-- IDENTICAL HEADER -->
+  <h1>
+    <img src="images/green_star.png" alt="star icon">
+    Captcha Gate
+    <img src="images/blue_chip.png" alt="chip icon">
+  </h1>
+
+  <!-- Info bubble -->
+  <div class="info-bubble">
+    <img src="images/blue_info.png" alt="info" class="info-icon">
+    <div class="tooltip">
+      <h3>About the project</h3>
+      <p><em>Captcha Gate</em> explores what happens when the line between humans and "artificial intelligence" starts to blur. Normally, CAPTCHAs are meant to keep bots out — they’re the internet’s way of deciding who is “real.” But in this project, we flip that logic: instead of blocking bots, we let them in, just not where they expect to go.</p>
+      <p>Both humans and bots face the same puzzle, but they solve it in completely different ways — people use vision and intuition, while bots read hidden metadata. Once solved, each is redirected to its own space: humans to a human blog, and bots to a bot blog, where they unknowingly talk only to other bots.</p>
+      <p>By doing this, the project raises questions about who controls access online and what “intelligence” really means. It’s not about improving CAPTCHA technology, but about rethinking the systems that separate humans and machines — and showing, in a playful way, how those systems could be turned inside out.</p>
+    </div>
+  </div>
+
+  <div class="subtitle">Welcome to our Human vs Bot interactive experiment!</div>
+
+  <div class="description">
+    <p>This project explores how humans and AI perceive and solve the same challenge differently.</p>
+    <p>Here, both humans and bots face the same 3×3 puzzle: humans solve it visually by dragging pieces, while bots solve it by reading hidden metadata.</p>
+    <p>Successfully completing the puzzle grants access to separate blog pages: one for humans, one for bots. The goal is to highlight the contrasting ways intelligence — biological or artificial — approaches problem-solving, and to create an engaging, expressive interaction that lets users witness a bot's 'thinking' process.</p>
+  </div>
+
+  <div class="toggle-section">
+    <label class="view-label human-view">
+      <img src="images/green_eye.png" alt="human icon">
+      Human view
+    </label>
+
+    <div class="toggle-wrapper">
+      <!-- Starts checked on bot.html -->
+      <input type="checkbox" id="viewToggle" class="toggle-input" checked>
+      <span class="toggle-slider"></span>
+    </div>
+
+    <label class="view-label bot-view">
+      <img src="images/gray_chip.png" alt="bot icon">
+      Bot view
+    </label>
+  </div>
+
+  <p class="bot-perspective">
+    <strong>Bot Perspective:</strong> While humans see and manipulate visual puzzle pieces, bots read the hidden metadata (<code>data-pos</code> attributes) to understand the puzzle structure and solve it algorithmically.
+  </p>
+
+
+  <!-- BOT-SPECIFIC CONTENT (after toggle only) -->
+  <div id="container"></div>
+
+  <div id="bot-vision">
+  <h3>Bot Vision (interpreted data view)</h3>
+  <div class="bot-board" id="botBoard"></div>
+</div>
+
+
+  <button id="runBot">▶ Run Bot Solver</button>
+
+  <pre id="log" style="margin-top:20px; color:#00D3F2; font-family:monospace;"></pre>
+
+
+<script>
+const toggle = document.getElementById("viewToggle");
+const slider = document.querySelector(".toggle-slider");
+const humanLabel = document.querySelector(".human-view");
+const botLabel = document.querySelector(".bot-view");
+const humanIcon = humanLabel.querySelector("img");
+const botIcon = botLabel.querySelector("img");
+
+// Function to update label colors and icons based on toggle state
+function updateViewVisuals() {
+  if (toggle.checked) {
+    // Bot view active
+    humanLabel.style.color = "#717182";
+    botLabel.style.color = "#0a0a0a";
+    humanIcon.src = "images/gray_eye.png";
+    botIcon.src = "images/blue_chip.png";
+  } else {
+    // Human view active
+    humanLabel.style.color = "#0a0a0a";
+    botLabel.style.color = "#717182";
+    humanIcon.src = "images/green_eye.png";
+    botIcon.src = "images/gray_chip.png";
+  }
+}
+
+// Ensure toggle clickable everywhere
+slider.addEventListener("click", () => {
+  toggle.checked = !toggle.checked;
+  toggle.dispatchEvent(new Event("change"));
+});
+
+// Handle navigation + update visuals
+toggle.addEventListener("change", () => {
+  updateViewVisuals();
+
+  if (toggle.checked) {
+    // Going from Human → Bot
+    setTimeout(() => {
+      window.location.href = "bot.html";
+    }, 300);
+  } else {
+    // Going from Bot → Human
+    setTimeout(() => {
+      window.location.href = "index.html";
+    }, 300);
+  }
+});
+
+// --- Detect current page and sync ---
+if (window.location.pathname.includes("bot.html")) {
+  toggle.checked = true;
+}
+
+updateViewVisuals(); // Apply correct visuals on load
+
+  /* Bot view content (code/metadata rendering) */
+  const container = document.getElementById("container");
+  const log = document.getElementById("log");
+
+  const metaElement = document.querySelector('meta[name="puzzle-solution-bot"]');
+  const metaTag = {
+    name: "puzzle-solution-bot",
+    content: metaElement ? metaElement.getAttribute("content") : "unknown"
+  };
+
+
+  const metaSection = document.createElement("div");
+  metaSection.innerHTML = `
+    <h3>🔍 Metadata</h3>
+    <pre class="meta">&lt;meta name="<span class="key">${metaTag.name}</span>" content="<span class="value">${metaTag.content}</span>"&gt;</pre>
+  `;
+  container.appendChild(metaSection);
+
+
+
+  // Parse the bot's trusted order from <meta>
+  const fakeSolution = metaTag.content.split(",").map(n => parseInt(n, 10));
+
+  // Build data objects in the *metadata order* (NOT visual order)
+  const pieces = fakeSolution.map(pieceIndex => ({
+    "data-pos": pieceIndex, // what the bot trusts
+    "background-position": `${(pieceIndex % 3) * -100}px ${Math.floor(pieceIndex / 3) * -100}px`,
+    "image": "image.jpg"
+  }));
+
+  // --- BOT VISION VISUALIZATION (metadata-based order) ---
+  const botBoard = document.getElementById("botBoard");
+  botBoard.innerHTML = "";
+  pieces.forEach(p => {
+    const div = document.createElement("div");
+    div.classList.add("bot-piece");
+    div.style.backgroundPosition = p["background-position"];
+    div.innerHTML = `<div class="bot-meta">data-pos="${p["data-pos"]}"</div>`;
+    botBoard.appendChild(div);
+  });
+
+  // --- Code-like listing (also metadata order) ---
+  const pieceSection = document.createElement("div");
+  pieceSection.innerHTML = `<h3>🧩 Puzzle Pieces (data layer)</h3>`;
+  pieces.forEach(p => {
+    const div = document.createElement("div");
+    div.classList.add("piece");
+    div.innerHTML = `
+      &lt;div class="piece" <span class="key">data-pos</span>="<span class="value">${p["data-pos"]}</span>"
+      <span class="key">background-image</span>="<span class="value">${p["image"]}</span>"
+      <span class="key">background-position</span>="<span class="value">${p["background-position"]}</span>"&gt;
+      &lt;/div&gt;
+    `;
+    pieceSection.appendChild(div);
+  });
+  container.appendChild(pieceSection);
+
+
+
+
+
+
+  container.appendChild(pieceSection);
+
+  document.getElementById("runBot").addEventListener("click", async () => {
+    const log = document.getElementById("log");
+    log.textContent = "🤖 Connecting to bot server...\n";
+
+    try {
+      const response = await fetch("http://127.0.0.1:5000/run-bot", {
+        method: "POST"
+      });
+
+      const data = await response.json();
+      log.textContent += data.status + "\n";
+      log.textContent += "🚀 Chrome window should open now...\n";
+
+    } catch (err) {
+      log.textContent += "❌ ERROR: Could not reach server.py\n";
+      log.textContent += "➡ Make sure: python server.py is running.\n";
+    }
+  });
+
+  function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+</script>
+</body>
+</html>
