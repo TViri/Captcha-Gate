@@ -39,11 +39,13 @@
       color: var(--accent);
       text-decoration: none;
       margin-bottom: 16px;
-      transition: opacity .2s ease;
+      transition: opacity .2s ease, background-color .2s ease;
       font-family: "Tiny5", sans-serif;
+      padding:8px 10px;
+      border-radius:8px;
     }
     .back-link img { width: 16px; height: 16px; }
-    .back-link:hover { opacity: 0.8; }
+    .back-link:hover { opacity: 1; background: #fff;}
 
     h1.title {
       margin: 0;
@@ -103,15 +105,15 @@
     }
     .author-name {
       font-weight: 500;
-      font-size: 16px;
+      font-size: 20px;
     }
     .timestamp {
-      font-size: 12px;
+      font-size: 16px;
       color: var(--text-dim);
     }
 
     .post-tag {
-      font-size: 12px;
+      font-size: 18px;
       padding: 6px 10px;
       border-radius: 8px;
       border: 1px solid rgba(255,255,255,0.1);
@@ -122,12 +124,12 @@
     .post-tag.questions { background: rgba(194,122,255,0.1); color: #C27AFF; }
 
     .post-title {
-      font-size: 24px;
+      font-size: 32px;
       font-weight: 600;
       font-family: "Tiny5", sans-serif;
     }
     .post-text {
-      font-size: 20px;
+      font-size: 24px;
       line-height: 30px;
       color: var(--text-dim);
     }
@@ -147,6 +149,30 @@
   text-align: left;
 }
 
+/* NEW POST ANIMATION */
+.post.new-post {
+  animation: popIn 0.7s ease forwards;
+  transform-origin: top;
+}
+
+@keyframes popIn {
+  0% {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+    box-shadow: 0 0 0 rgba(0, 211, 242, 0);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(0) scale(1.03);
+    box-shadow: 0 0 20px rgba(0, 211, 242, 0.25);
+  }
+  100% {
+    transform: translateY(0) scale(1);
+    box-shadow: 0 0 0 rgba(0, 211, 242, 0);
+  }
+}
+
+
 
   </style>
 </head>
@@ -162,62 +188,196 @@
 
     <div id="posts" class="posts"></div>
   </div>
-  <script>
-    const defaultPosts = [];
-
-    const stored = JSON.parse(localStorage.getItem("forestPosts")) || [];
-    let posts = [...defaultPosts, ...stored];
-
-    function getCurrentTimeString() {
-      const now = new Date();
-      return now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-    }
 
 
-    function renderPosts() {
-      const container = document.getElementById("posts");
-      container.innerHTML = "";
-      posts.slice().reverse().forEach((post, index) => {
-        const div = document.createElement("div");
-        div.classList.add("post");
-        div.innerHTML = `
-          <div class="post-header">
-            <div class="author-box">
-              <div class="author-info">
-                <div class="author-name">${post.author}</div>
-                <div class="timestamp">${post.time}</div>
-              </div>
-            </div>
-            <div class="post-tag ${post.tag}">${post.tag}</div>
+<script>
+/* -----------------------------------------
+   1. ALL POSTS (fixed list of 9)
+------------------------------------------ */
+const allPosts = [
+  {
+    author: "Unknown User",
+    tag: "ideas",
+    title: "#00FF00",
+    text: "Fellow humans, what is your favorite color? Mine is #00FF00... I mean green.",
+    time: "09:12 AM"
+  },
+  {
+    author: "Unknown User",
+    tag: "ideas",
+    title: "Hmm...nutrients",
+    text: "I have consumed nutrients today through my mouth hole. Delicious!",
+    time: "10:24 PM"
+  },
+  {
+    author: "Unknown User",
+    tag: "ideas",
+    title: "Love music",
+    text: "I enjoy music vibrations through my audio receptors... ears, sorry.",
+    time: "06:53 PM"
+  },
+  {
+    author: "Unknown User",
+    tag: "ideas",
+    title: "Dreaming...",
+    text: "I experienced a dream during sleep mode. It involved cats and the internet.",
+    time: "02:21 PM"
+  },
+  {
+    author: "Unknown User",
+    tag: "ideas",
+    title: "Walk in the park",
+    text: "Today I went to the park and did walking. Very human experience!",
+    time: "11:08 AM"
+  },
+  {
+    author: "Unknown User",
+    tag: "ideas",
+    title: "Coffee, coffee, coffee",
+    text: "I require more coffee.jar to continue my daily tasks efficiently.",
+    time: "04:40 PM"
+  },
+  {
+    author: "Unknown User",
+    tag: "ideas",
+    title: "Nice weather",
+    text: "The weather is nice today. Perfect for outdoor human activities.",
+    time: "09:22 AM"
+  },
+  {
+    author: "Unknown User",
+    tag: "ideas",
+    title: "TV",
+    text: "I watched television last night. Very entertaining content for my brain.",
+    time: "10:39 PM"
+  },
+  {
+    author: "Unknown User",
+    tag: "ideas",
+    title: "Skin suit",
+    text: "My skin suit is functioning normally. How is yours?",
+    time: "03:44 PM"
+  }
+];
+
+/* -----------------------------------------
+   2. CONFIG
+------------------------------------------ */
+
+// The 3 middle baseline posts
+const BASE_INDICES = [1, 2, 3]; // Always: nutrients, music, dreaming
+
+// Posts that rotate as NEW posts
+const QUEUE_INDICES = [0, 4, 5, 6, 7, 8];
+
+// LocalStorage key
+const POINTER_KEY = "botNewPostPointer";
+
+/* -----------------------------------------
+   3. HELPERS
+------------------------------------------ */
+function getCurrentTimeString() {
+  return new Date().toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit"
+  });
+}
+
+function getPointer() {
+  const v = parseInt(localStorage.getItem(POINTER_KEY), 10);
+  return Number.isFinite(v) ? v : 0;
+}
+
+function savePointer(n) {
+  localStorage.setItem(POINTER_KEY, String(n));
+}
+
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function renderPosts(posts) {
+  const container = document.getElementById("posts");
+  container.innerHTML = "";
+
+  posts.forEach(post => {
+    const div = document.createElement("div");
+    div.classList.add("post");
+    if (post.__isFresh) div.classList.add("new-post");
+
+    div.innerHTML = `
+      <div class="post-header">
+        <div class="author-box">
+          <div class="author-info">
+            <div class="author-name">${post.author}</div>
+            <div class="timestamp">${post.time}</div>
           </div>
-          <div class="post-title">${post.title}</div>
-          <div class="post-text">${post.text}</div>
-        `;
-        container.appendChild(div);
-      });
-    }
+        </div>
+        <div class="post-tag ${post.tag}">${post.tag}</div>
+      </div>
+      <div class="post-title">${post.title}</div>
+      <div class="post-text">${post.text}</div>
+    `;
+    container.appendChild(div);
+  });
+}
 
-    function savePosts() {
-      const custom = posts.filter(p => !defaultPosts.some(dp => dp.title === p.title && dp.author === p.author));
-      localStorage.setItem("forestPosts", JSON.stringify(custom));
-    }
+/* -----------------------------------------
+   4. MAIN LOGIC
+------------------------------------------ */
+document.addEventListener("DOMContentLoaded", () => {
 
-    // API for your bot_solver.py
-    window.addBotPost = function(author, title, text, tag="ideas") {
-      const newPost = {
-        author,
-        tag,
-        title,
-        text,
-        time: getCurrentTimeString()
+  const pointer = getPointer();
+  const freshPostIndex = QUEUE_INDICES[pointer % QUEUE_INDICES.length];
+
+  // bottom = all queue posts except the one that will appear later
+  const bottomPool = QUEUE_INDICES.filter(i => i !== freshPostIndex);
+
+  // Choose 4 random bottom posts
+  const shuffled = shuffle(bottomPool).slice(0, 4);
+
+  // INITIAL POSTS: 3 baseline + 4 bottom = 7 total
+  const initialPosts = [
+    ...BASE_INDICES.map(i => {
+      return {
+        ...allPosts[i]
       };
-      posts.push(newPost);
-      savePosts();
-      renderPosts();
-    }
+    }),
+    ...shuffled.map(i => {
+      return {
+        ...allPosts[i]
+      };
+    })
+  ];
+
+  renderPosts(initialPosts);
+
+  // After delay → add fresh NEW post at the top
+  setTimeout(() => {
+    const freshBase = allPosts[freshPostIndex];
+    const freshPost = {
+      ...freshBase,
+      time: getCurrentTimeString(),
+      __isFresh: true
+    };
+
+    const finalPosts = [freshPost, ...initialPosts];
+    renderPosts(finalPosts);
+
+    // advance pointer for next visit
+    savePointer(pointer + 1);
+
+  }, 3000); // 1.5 seconds
+});
+</script>
 
 
-    renderPosts();
-  </script>
+
+
 </body>
 </html>

@@ -6,35 +6,72 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/x-icon" href="images/robot.ico">
 <title>Captcha Gate – Bot View</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Jomhuria&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Palanquin:wght@100;200;300;400;500;600;700&display=swap" rel="stylesheet">
+
 <style>
   /* --- COPY of index.html styles so the header/toggle look identical --- */
+
+    /* Page fade transition */
+  body {
+    opacity: 1;
+    transition: opacity 0.25s ease;
+  }
+
+  body.fade-out {
+    opacity: 0;
+  }
+
   body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    font-family: "Inter", sans-serif;
+    font-family: "Palanquin", sans-serif;
     background: #fafafa;
     text-align: center;
-    background-image: url('images/background.png');
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
+    background-color: #113822;
   }
+
+    body {
+  position: relative;
+  background: none; /* remove old bg */
+  overflow-x: hidden;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url('images/bg2.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: 0.9;     /* 70% opacity */
+  z-index: -1;       /* behind all content */
+}
+
+
 
   /* Title and description styles */
   h1 {
-    font-size: 44px;
-    font-weight: 700;
-    background: linear-gradient(90deg, #00A63E 0%, #155DFC 100%);
+    font-size: 96px;
+    font-family: 'Jomhuria', 'Arial Narrow', sans-serif;
+    font-size-adjust: 0.30;
+    line-height: 0.85;
+    font-weight: 500;
+    color: #fff;
     background-clip: text;
-    -webkit-background-clip: text; /* for Chrome/Safari */
-    -webkit-text-fill-color: transparent;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 16px;
     margin-top: 1rem;
-    margin-bottom: 1rem;
+    margin-bottom: 0;
   }
   h1 img {
     width: 28px;
@@ -42,17 +79,22 @@
   }
 
   .subtitle {
-    font-size: 20px;
+    font-size: 24px;
     font-weight: 600;
-    color: #505063;
+    color: #113822;
   }
 
   .description {
-    color: #717182;
-    font-size: 16px;
+    color: #113822;
+    font-size: 20px;
     line-height: 32px;
     max-width: 850px;
     margin: 0 auto;
+  }
+
+  .description p {
+    margin: 0;
+    margin-top: 16px;
   }
 
   /* Toggle section */
@@ -60,7 +102,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 20px;
+    gap: 20px;    
   }
 
   .view-label {
@@ -130,6 +172,7 @@
     border: 1px solid #30363d;
     border-radius: 8px;
     padding: 1rem;
+    margin: auto;
     margin-top: 1.25rem;
     width: 90%;
     max-width: 800px;
@@ -153,7 +196,7 @@
 
   #runBot {
     background: #21262d;
-    color: #9cdcfe;
+    color: #fff;
     border: 1px solid #30363d;
     padding: 0.6rem 1.2rem;
     border-radius: 6px;
@@ -177,6 +220,17 @@
     text-align: left;
   }
 
+  .glass-box {
+  width: 864px;
+  max-width: 100%;
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(2px);
+  padding: 24px;
+  border-radius: 20px;
+  margin-bottom: 20px;
+}
+
+
   /* Info bubble */
 .info-bubble {
   position: fixed;
@@ -190,8 +244,8 @@
 }
 
 .info-icon {
-  width: 28px;
-  height: 28px;
+  width: 50px;
+  height: 50px;
   transition: transform 0.2s ease;
 }
 
@@ -211,7 +265,7 @@
   font-size: 14px;
   line-height: 22px;
   text-align: left;
-  width: 280px;
+  width: 340px;
   padding: 16px;
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
@@ -221,7 +275,7 @@
 .tooltip h3 {
   margin-top: 0;
   font-size: 16px;
-  color: #155DFC;
+  color: #113822;
 }
 
 .info-bubble:hover .tooltip {
@@ -230,7 +284,7 @@
 }
 
 .bot-perspective {
-  color: #155DFC;
+  color: #113822;
   font-size: 15px;
   line-height: 26px;
   max-width: 800px;
@@ -239,7 +293,7 @@
   padding-left: 0.5rem;
 }
 .bot-perspective code {
-  color: #155DFC;
+  color: #113822;
   font-weight: 600;
   background: rgba(21, 93, 252, 0.08);
   padding: 2px 6px;
@@ -252,13 +306,13 @@
   width: 90%;
   max-width: 800px;
   text-align: left;
-  color: #c9d1d9;
+  color: #113822;
   width: max-content;
   margin: 0 auto;
 }
 
 #bot-vision h3 {
-  color: #155DFC;
+  color: #000;
   font-size: 18px;
   margin-bottom: 1rem;
   text-align: center;
@@ -282,7 +336,7 @@
   position: relative;
   border: 1px solid #30363d;
   border-radius: 6px;
-  background-image: url('dino1.jpg');
+  background-image: url('puzzle.jpg');
   background-size: 300px 300px;
   filter: grayscale(100%) opacity(0.85);
 }
@@ -299,74 +353,145 @@
   font-family: "Courier New", monospace;
 }
 
+/* --- VIDEO OVERLAY (minimal) --- */
+.overlay.hidden {
+  display: none;
+}
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.overlay-bg {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7); /* darken background */
+}
+
+.video-player {
+  position: relative;
+  z-index: 10000;
+  border: none;
+  outline: none;
+  background: transparent;
+}
+.video-crop {
+  width: 900px;            /* final width you WANT to show */
+  height: 770px;           /* final height you WANT to show */
+  overflow: hidden;        /* hides right side */
+  border-radius: 0;        /* remove if not needed */
+  position: relative;
+}
+
+.video-crop video {
+  position: absolute;
+  right: -110px;             /* how much to crop from the right */
+  top: 0;
+  height: 100%;
+}
+
+
+
 
 </style>
 </head>
-<body>
+<body class="fade-out">
   <!-- IDENTICAL HEADER -->
   <h1>
-    <img src="images/green_star.png" alt="star icon">
     Captcha Gate
-    <img src="images/blue_chip.png" alt="chip icon">
   </h1>
 
   <!-- Info bubble -->
   <div class="info-bubble">
-    <img src="images/blue_info.png" alt="info" class="info-icon">
+    <img src="images/treasure.png" alt="info" class="info-icon">
     <div class="tooltip">
       <h3>About the project</h3>
-      <p><em>Captcha Gate</em> explores what happens when the line between humans and "artificial intelligence" starts to blur. Normally, CAPTCHAs are meant to keep bots out — they’re the internet’s way of deciding who is “real.” But in this project, we flip that logic: instead of blocking bots, we let them in, just not where they expect to go.</p>
-      <p>Both humans and bots face the same puzzle, but they solve it in completely different ways — people use vision and intuition, while bots read hidden metadata. Once solved, each is redirected to its own space: humans to a human blog, and bots to a bot blog, where they unknowingly talk only to other bots.</p>
-      <p>By doing this, the project raises questions about who controls access online and what “intelligence” really means. It’s not about improving CAPTCHA technology, but about rethinking the systems that separate humans and machines — and showing, in a playful way, how those systems could be turned inside out.</p>
+      <p>This project examines the increasingly blurry line between humans and bots. Traditionally, CAPTCHAs are designed to keep automated systems out. They claim to determine who is “real,” yet in practice they mostly collect data.</p>
+      <p>In this experience, humans and bots are presented with the same puzzle but solve it through entirely different means. Humans rely on vision and intuition, while bots detect and interpret hidden metadata. When the puzzle is completed, each is redirected to a different destination: one designed for humans, the other for bots.</p>
+      <p>Rather than excluding artificial intelligence, the project allows it in, quietly placing it in a space where it interacts only with other machines. This reversal prompts a reconsideration of how we design websites in an era where automated traffic now dominates. It invites reflection on whether current security systems still make sense and what it means to maintain a sense of humanity online as data, automation, and artificial intelligence continue to expand.</p>
+      <p>By offering separate blog environments based on how the puzzle was solved, the project highlights the different cognitive paths taken by biological and synthetic intelligence. It becomes a playful exploration of how we define intelligence, how we distinguish ourselves from machines, and how those boundaries might be shifting.</p>
+
     </div>
   </div>
 
-  <div class="subtitle">Welcome to our Human vs Bot interactive experiment!</div>
+  <div class="glass-box">
 
-  <div class="description">
-    <p>This project explores how humans and AI perceive and solve the same challenge differently.</p>
-    <p>Here, both humans and bots face the same 3×3 puzzle: humans solve it visually by dragging pieces, while bots solve it by reading hidden metadata.</p>
-    <p>Successfully completing the puzzle grants access to separate blog pages: one for humans, one for bots. The goal is to highlight the contrasting ways intelligence — biological or artificial — approaches problem-solving, and to create an engaging, expressive interaction that lets users witness a bot's 'thinking' process.</p>
+      <div class="subtitle">Welcome! Or shall we say 01001000 01000101 01001100 01001100 01001111</div>
+
+    <div class="description">
+      <p>Test your intelligence and solve the puzzle!</p>
+      <p>Can you prove that you are human and proceed to the digital garden?<br>Or will you get lost in the forest of fake conversations? </p>
+    </div>
   </div>
 
-  <div class="toggle-section">
-    <label class="view-label human-view">
-      <img src="images/green_eye.png" alt="human icon">
-      Human view
-    </label>
+  <div class="glass-box">
 
-    <div class="toggle-wrapper">
-      <!-- Starts checked on bot.html -->
-      <input type="checkbox" id="viewToggle" class="toggle-input" checked>
-      <span class="toggle-slider"></span>
+      <div class="toggle-section">
+        <label class="view-label human-view">
+          <img src="images/eye_black.png" alt="human icon">
+          Human view
+        </label>
+
+        <div class="toggle-wrapper">
+          <!-- Starts checked on bot.html -->
+          <input type="checkbox" id="viewToggle" class="toggle-input" checked>
+          <span class="toggle-slider"></span>
+        </div>
+
+        <label class="view-label bot-view">
+          <img src="images/bot_black.png" alt="bot icon">
+          Bot view
+        </label>
+      </div>
+
+      <p class="bot-perspective">
+        <strong>Bot Perspective:</strong> While humans see and manipulate visual puzzle pieces, bots read the hidden metadata (<code>data-pos</code> attributes) to understand the puzzle structure and solve it algorithmically.
+      </p>
+
+
+      <!-- BOT-SPECIFIC CONTENT (after toggle only) -->
+      <div id="container"></div>
+
+      <div id="bot-vision">
+      <h3>Bot Vision</h3>
+      <div class="bot-board" id="botBoard"></div>
     </div>
 
-    <label class="view-label bot-view">
-      <img src="images/gray_chip.png" alt="bot icon">
-      Bot view
-    </label>
+      
+    <button id="runBot">Run Bot</button>
+
+
   </div>
 
-  <p class="bot-perspective">
-    <strong>Bot Perspective:</strong> While humans see and manipulate visual puzzle pieces, bots read the hidden metadata (<code>data-pos</code> attributes) to understand the puzzle structure and solve it algorithmically.
-  </p>
 
+<!-- VIDEO POPUP OVERLAY -->
+<div id="botVideoOverlay" class="overlay hidden">
+  <div class="overlay-bg"></div>
+  
+  
+  <div class="video-crop">
 
-  <!-- BOT-SPECIFIC CONTENT (after toggle only) -->
-  <div id="container"></div>
+        <video id="botVideo" class="video-player" width="900">
+          <source src="video.mp4" type="video/mp4">
+        </video>
+  </div>
 
-  <div id="bot-vision">
-  <h3>Bot Vision (interpreted data view)</h3>
-  <div class="bot-board" id="botBoard"></div>
 </div>
 
 
-  <button id="runBot">▶ Run Bot Solver</button>
-
-  <pre id="log" style="margin-top:20px; color:#00D3F2; font-family:monospace;"></pre>
 
 
 <script>
+
+window.addEventListener("DOMContentLoaded", () => {
+  document.body.classList.remove("fade-out");
+});
+
 const toggle = document.getElementById("viewToggle");
 const slider = document.querySelector(".toggle-slider");
 const humanLabel = document.querySelector(".human-view");
@@ -378,16 +503,16 @@ const botIcon = botLabel.querySelector("img");
 function updateViewVisuals() {
   if (toggle.checked) {
     // Bot view active
-    humanLabel.style.color = "#717182";
-    botLabel.style.color = "#0a0a0a";
-    humanIcon.src = "images/gray_eye.png";
-    botIcon.src = "images/blue_chip.png";
+    humanLabel.style.color = "#000";
+    botLabel.style.color = "#000";
+    humanIcon.src = "images/eye_black.png";
+    botIcon.src = "images/bot_black.png";
   } else {
     // Human view active
-    humanLabel.style.color = "#0a0a0a";
-    botLabel.style.color = "#717182";
-    humanIcon.src = "images/green_eye.png";
-    botIcon.src = "images/gray_chip.png";
+    humanLabel.style.color = "#000";
+    botLabel.style.color = "#000";
+    humanIcon.src = "images/eye_black.png";
+    botIcon.src = "images/bot_black.png";
   }
 }
 
@@ -485,24 +610,27 @@ updateViewVisuals(); // Apply correct visuals on load
 
   container.appendChild(pieceSection);
 
-  document.getElementById("runBot").addEventListener("click", async () => {
-    const log = document.getElementById("log");
-    log.textContent = "🤖 Connecting to bot server...\n";
 
-    try {
-      const response = await fetch("http://127.0.0.1:5000/run-bot", {
-        method: "POST"
-      });
 
-      const data = await response.json();
-      log.textContent += data.status + "\n";
-      log.textContent += "🚀 Chrome window should open now...\n";
+  // === VIDEO POPUP LOGIC ===
+  const runBtn = document.getElementById("runBot");
+  const overlay = document.getElementById("botVideoOverlay");
+  const video = document.getElementById("botVideo");
 
-    } catch (err) {
-      log.textContent += "❌ ERROR: Could not reach server.py\n";
-      log.textContent += "➡ Make sure: python server.py is running.\n";
-    }
+  // Show overlay and play video
+  runBtn.addEventListener("click", () => {
+    overlay.classList.remove("hidden");
+    video.currentTime = 0;
+    video.play();
   });
+
+  // When video ends → go to blog
+  video.addEventListener("ended", () => {
+    window.location.href = "blog_bot.html";
+  });
+
+
+
 
   function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));

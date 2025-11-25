@@ -6,24 +6,30 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="icon" type="image/x-icon" href="images/garden.ico">
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Aladin&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Palanquin:wght@100;200;300;400;500;600;700&display=swap');
     :root{
       --text-dark:#0A0A0A;
       --gray:#717182;
       --green:#00A63E;
       --green-2:#009966;
-      --chip: linear-gradient(90deg, #00A63E 0%, #096 50%, #009689 100%);
     }
     *{box-sizing:border-box}
     body{
       margin:0;
       padding:24px 16px 64px;
-      font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      font-family: "Palanquin", sans-serif;
       display:flex;
       flex-direction:column;
       align-items:center;
       color:var(--text-dark);
-      background:#fafafa;
+      background:#003423;
       overflow-y: scroll;
+    }
+
+    h1{
+      font-family: 'Aladin', sans-serif;
+      color: #D9D9D9;
     }
 
     /* Back link */
@@ -35,14 +41,14 @@
       padding:8px 10px;
       border-radius:8px;
       text-decoration:none;
-      color:var(--text-dark);
+      color: #fff;
       transition:background-color .2s ease;
     }
     .back-link img {
       width: 16px;
     }
 
-    .back-link:hover{ background:#eee; }
+    .back-link:hover{ background:#009966; }
 
     /* Title */
     .title{
@@ -54,10 +60,8 @@
       font-size:48px;
       font-weight: 400;
       line-height: 48px;
-      background: var(--chip);
       -webkit-background-clip:text;
       background-clip:text;
-      -webkit-text-fill-color:transparent;
     }
     .title img{ width:32px; height:32px; }
 
@@ -67,6 +71,7 @@
       color:var(--gray);
       text-align:center;
       max-width:864px;
+      color: #D9D9D9;
     }
 
     /* Tags filter */
@@ -74,7 +79,6 @@
       display:flex;
       gap:10px;
       flex-wrap:wrap;
-      margin:10px 0 22px;
     }
     .tag{
       display:inline-flex;
@@ -225,13 +229,15 @@
     }
 
     /* Placeholder posts container (optional; initially empty) */
-    .posts{
-      width:864px;
-      max-width:100%;
-      margin-top:20px;
-      display:grid;
-      gap:12px;
+    .posts {
+      width: 864px;
+      max-width: 100%;
+      margin-top: 20px;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr); /* two equal columns */
+      gap: 16px; /* space between cards */
     }
+
     .hidden{ display:none !important; }
 
 .blog-wrapper {
@@ -260,13 +266,12 @@
 
 /* --- BLOG POSTS --- */
 .post {
-  width: 864px;
+  width: 100%;
   max-width: 100%;
   background: rgba(255, 255, 255, 0.8);
   border: 1px solid rgba(185, 248, 207, 0.5);
   border-radius: 14px;
   padding: 24px;
-  margin-top: 16px;
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -333,10 +338,15 @@
   gap: 6px; /* small space between tag bubble and emoji */
 }
 
-.post-emoji {
-  font-size: 14px;
-  line-height: 1;
+.post-tag-icon {
+    width: 18px;
+    height: 18px;
+    opacity: 0.8;    /* optional slight fade */
 }
+
+
+
+
 
 .post-tag.learning { background:#D0FAE5; color:#007A55; }
 .post-tag.ideas { background:#FEF9C2; color:#A65F00; }
@@ -353,6 +363,7 @@
   font-size: 16px;
   line-height: 24px;
   color: #717182;
+  flex-grow: 1;
 }
 
 .post-footer {
@@ -487,14 +498,13 @@
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  width: 864px;
-  max-width: 100%;
-  margin-top: -8px;
-  margin-bottom: 16px;
-  font-size: 14px;
-  color: #717182;
+  flex: 1;
+  margin: 0;
   gap: 8px;
+  font-size: 14px;
+  color: #fff;
 }
+
 
 .set-name-btn {
   background: none;
@@ -509,6 +519,18 @@
   color: #008236;
 }
 
+.tags-row {
+  width: 864px;
+  max-width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  margin: 10px 0 22px;
+  gap: 16px;
+}
+
+
 
 
   </style>
@@ -517,7 +539,7 @@
   <div class="blog-wrapper">
       <!-- Back to gate -->
   <a class="back-link" href="index.html" title="Back to Gate">
-    <img src="images/arrow_left_black.png" alt="Left arrow">
+    <img src="images/arrow_left_white.png" alt="Left arrow">
     <span>Back to Gate</span>
   </a>
 
@@ -527,16 +549,14 @@
     Digital Garden
   </h1>
 
-  <div class="user-name-control">
-    <span id="currentUserName">Posting as <strong>You</strong></span>
-    <button id="setUserNameBtn" class="set-name-btn">Set your name</button>
-  </div>
 
 
   <!-- Subtitle -->
   <div class="subtitle">
     A space for growing ideas, learning in public, and cultivating knowledge together
   </div>
+
+  <div class="tags-row">
 
   <!-- Filter tags -->
   <div class="tags" id="tags">
@@ -557,6 +577,16 @@
       Questions
     </button>
   </div>
+
+  <div class="user-name-control">
+    <span id="currentUserName">Posting as <strong>You</strong></span>
+    <button id="setUserNameBtn" class="set-name-btn">Set your name</button>
+  </div>
+
+  </div>
+
+
+
 
   <!-- New seed button -->
   <button class="new-seed-btn" id="newSeedBtn">
@@ -800,13 +830,12 @@ function renderPost(post) {
       </div>
     
       <div class="post-tag-wrapper">
-  <div class="post-tag ${post.tag}">
-      ${post.tag.charAt(0).toUpperCase() + post.tag.slice(1)}
-    </div>
-    <span class="post-emoji">${
-      post.tag === "learning" ? "🍃" : post.tag === "ideas" ? "🌿" : "🌸"
-    }</span>
-  </div>
+        <div class="post-tag ${post.tag}">
+          ${post.tag.charAt(0).toUpperCase() + post.tag.slice(1)}
+        </div>
+      </div>
+
+
 
   
     </div>
